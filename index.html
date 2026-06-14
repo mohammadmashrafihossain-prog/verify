@@ -28,7 +28,7 @@
     const token = urlParams.get('token');
 
     // ⚠️ মনোযোগ দিন: ধাপ ৩ শেষ করার পর Vercel থেকে যে লিঙ্কটি পাবেন, সেটি নিচে বসাবেন
-    const BACKEND_URL = "https://your-vercel-project-url.vercel.app/api/verify";
+    const BACKEND_URL = "https://tg-backend-zeta.vercel.app";
 
     if (!tgId || !token) {
         document.getElementById('status-container').innerHTML = `<h2 class="error">ভুল লিঙ্ক!</h2><p>টেলিগ্রাম বট থেকে সঠিক লিঙ্কে প্রবেশ করুন।</p>`;
