@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Verification</title>
+    <script src="https://openfpcdn.io/fingerprintjs/v4"></script>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f7f6; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #e74c3c; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .success { color: #2ecc71; font-weight: bold; }
+        .error { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div id="status-container">
+        <h2>ডিভাইস ভেরিফিকেশন</h2>
+        <p>অনুগ্রহ করে অপেক্ষা করুন, আপনার ডিভাইসটি পরীক্ষা করা হচ্ছে...</p>
+        <div class="loader"></div>
+    </div>
+</div>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const tgId = urlParams.get('tg_id');
+    const token = urlParams.get('token');
+
+    // ⚠️ মনোযোগ দিন: ধাপ ৩ শেষ করার পর Vercel থেকে যে লিঙ্কটি পাবেন, সেটি নিচে বসাবেন
+    const BACKEND_URL = "https://your-vercel-project-url.vercel.app/api/verify";
+
+    if (!tgId || !token) {
+        document.getElementById('status-container').innerHTML = `<h2 class="error">ভুল লিঙ্ক!</h2><p>টেলিগ্রাম বট থেকে সঠিক লিঙ্কে প্রবেশ করুন।</p>`;
+    } else {
+        FingerprintJS.load()
+            .then(fp => fp.get())
+            .then(result => {
+                const visitorId = result.visitorId;
+                
+                fetch(BACKEND_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tg_id: tgId, token: token, device_id: visitorId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        document.getElementById('status-container').innerHTML = `<h2 class="success">ভেরিফিকেশন সফল!</h2><p>${data.message}</p>`;
+                    } else {
+                        document.getElementById('status-container').innerHTML = `<h2 class="error">ভেরিফিকেশন ব্যর্থ!</h2><p>${data.message}</p>`;
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('status-container').innerHTML = `<h2 class="error">সার্ভার ত্রুটি!</h2><p>আবার চেষ্টা করুন।</p>`;
+                });
+            });
+    }
+</script>
+</body>
+</html>
